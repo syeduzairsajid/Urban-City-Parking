@@ -316,57 +316,6 @@ class PassManager:
         return None
 
 
-# =========================================================
-# Fee Calculator
-# =========================================================
-class FeeCalculator:
-    """
-    Returns: (fee, rule, pass_info, applied_pass_type)
-    applied_pass_type is pass USAGE info (used or auto-detected).
-    """
-
-    def __init__(self):
-        self.strategy: PricingStrategy = HourlyPricingStrategy()
-
-    def compute_fee(self, session: ParkingSession, pass_manager: PassManager) -> tuple[float, str, str, str | None]:
-        assert session.exit_time is not None, "Session must be closed before fee calculation."
-
-        applied_pass_type: str | None = None
-
-        # 1) If pass was explicitly used
-        if session.pass_used is not None:
-            p = session.pass_used
-
-            if not p.is_valid(session.exit_time):
-                pass_info = f"{p.pass_type} INVALID (charged normally)"
-                applied_pass_type = None
-            else:
-                if isinstance(p, MonthlyPass):
-                    return 0.0, "MonthlyPass Applied", "MonthlyPass VALID (fee waived)", "MonthlyPass"
-                if isinstance(p, WeeklyPass):
-                    return 0.0, "WeeklyPass Applied", "WeeklyPass VALID (fee waived)", "WeeklyPass"
-                if isinstance(p, SingleEntryPass):
-                    p.mark_used()
-                    return 0.0, "SingleEntryPass Applied", "SingleEntryPass USED (fee waived)", "SingleEntryPass"
-
-                applied_pass_type = p.pass_type
-                pass_info = f"{p.pass_type} VALID"
-        else:
-            pass_info = "No pass"
-
-        # 2) Auto-detect pass by plate (weekly/monthly)
-        auto_p = pass_manager.find_valid_pass(session.vehicle.plate, session.exit_time)
-        if isinstance(auto_p, (MonthlyPass, WeeklyPass)):
-            return 0.0, "Pass Auto-Detected", f"{auto_p.pass_type} VALID (fee waived)", auto_p.pass_type
-
-        # 3) Normal pricing
-        fee = self.strategy.calculate_price(
-            duration_seconds=session.duration_seconds(),
-            vehicle=session.vehicle,
-            entry_time=session.entry_time,
-            exit_time=session.exit_time,
-        )
-        return fee, self.strategy.rule_name(), pass_info, applied_pass_type
 
 
 # =========================================================
