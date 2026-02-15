@@ -14,9 +14,7 @@ using a structured and modular design.
 This repository serves as the main project repository. Other group members have
 forked this repository to implement their individual contributions as required
 
-by the assessment guidelines. 
-=======
-by the assessment guidelines.
+
 ## Author
 Syed Uzair Sajid
 
