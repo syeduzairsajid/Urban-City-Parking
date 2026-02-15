@@ -315,7 +315,6 @@ class PassManager:
                 return p
         return None
 
-
 # =========================================================
 # Fee Calculator
 # =========================================================
@@ -367,6 +366,7 @@ class FeeCalculator:
             exit_time=session.exit_time,
         )
         return fee, self.strategy.rule_name(), pass_info, applied_pass_type
+
 
 
 # =========================================================
