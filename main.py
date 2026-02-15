@@ -212,7 +212,7 @@ class HourlyPricingStrategy(PricingStrategy):
         entry_time: datetime,
         exit_time: datetime,
     ) -> float:
-        total_fee = 0.0
+        total_fee = 0.00
         billed_hours = ceil_hours(duration_seconds)
 
         current_time = entry_time
@@ -863,10 +863,8 @@ def main():
 
         except Exception as ex:
             print(f"\nERROR: {ex}\n")
-
-
 # =========================================================
-# Unit Tests (Required by guideline: use test library)
+# Unit Tests 
 # =========================================================
 class TestParkingFinanceReports(unittest.TestCase):
     def test_finance_profit(self):
@@ -896,4 +894,6 @@ if __name__ == "__main__":
     unittest.main()
 
     #main()
+
+
 
