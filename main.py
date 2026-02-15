@@ -212,7 +212,7 @@ class HourlyPricingStrategy(PricingStrategy):
         entry_time: datetime,
         exit_time: datetime,
     ) -> float:
-        total_fee = 0.0
+        total_fee = 0.00
         billed_hours = ceil_hours(duration_seconds)
 
         current_time = entry_time
@@ -367,6 +367,10 @@ class FeeCalculator:
             exit_time=session.exit_time,
         )
         return fee, self.strategy.rule_name(), pass_info, applied_pass_type
+=======
+
+
+
 
 
 # =========================================================
@@ -432,22 +436,11 @@ class FinanceModule:
     def list_creditors(self) -> list[Creditor]:
         return list(self.creditors)
 
-
 # =========================================================
-# Reporting Module (meets requirement wording properly)
+# Reporting Module 
 # =========================================================
-@dataclass
-class PassSale:
-    sold_on: date
-    pass_type: str            # WeeklyPass / MonthlyPass / SingleEntryPass
-    amount: float
-    pass_id: str
-    plate: str
 
 
-class ReportGenerator:
-    # ---- REQUIRED REPORTS ----
-    @staticmethod
     def monthly_pass_sales_report(pass_sales: list[PassSale]) -> dict[str, dict[str, int]]:
         """
         REQUIRED: Monthly sale report for weekly pass, monthly pass, single entry pass.
@@ -553,6 +546,7 @@ class ReportGenerator:
             )
         print("=======================================================\n")
 
+=======
 
 # =========================================================
 # Parking Lot
@@ -873,10 +867,8 @@ def main():
 
         except Exception as ex:
             print(f"\nERROR: {ex}\n")
-
-
 # =========================================================
-# Unit Tests (Required by guideline: use test library)
+# Unit Tests 
 # =========================================================
 class TestParkingFinanceReports(unittest.TestCase):
     def test_finance_profit(self):
@@ -906,4 +898,6 @@ if __name__ == "__main__":
     unittest.main()
 
     #main()
+
+
 
