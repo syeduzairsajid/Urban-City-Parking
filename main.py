@@ -432,7 +432,9 @@ class FinanceModule:
     def list_creditors(self) -> list[Creditor]:
         return list(self.creditors)
 
-
+# =========================================================
+# Reporting Module (meets requirement wording properly)
+# =========================================================
 
 
     def monthly_pass_sales_report(pass_sales: list[PassSale]) -> dict[str, dict[str, int]]:
