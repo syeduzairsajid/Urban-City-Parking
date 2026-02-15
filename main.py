@@ -434,6 +434,114 @@ class FinanceModule:
 
 
 
+
+    def monthly_pass_sales_report(pass_sales: list[PassSale]) -> dict[str, dict[str, int]]:
+        """
+        REQUIRED: Monthly sale report for weekly pass, monthly pass, single entry pass.
+        This counts PASSES SOLD (created), not pass usage.
+        """
+        report: dict[str, dict[str, int]] = {}
+        for s in pass_sales:
+            month_key = s.sold_on.strftime("%Y-%m")
+            report.setdefault(month_key, {"WeeklyPass": 0, "MonthlyPass": 0, "SingleEntryPass": 0})
+            if s.pass_type in report[month_key]:
+                report[month_key][s.pass_type] += 1
+        return report
+
+    @staticmethod
+    def monthly_car_count(receipts: list[Receipt]) -> dict[str, int]:
+        """REQUIRED: number of cars each month (unique plates), based on exit month."""
+        cars_by_month: dict[str, set[str]] = {}
+        for r in receipts:
+            month_key = r.exit_time.strftime("%Y-%m")
+            cars_by_month.setdefault(month_key, set()).add(r.plate)
+        return {m: len(cars) for m, cars in cars_by_month.items()}
+
+    # ---- Finance monthly reporting (useful + aligns with finance requirement) ----
+    @staticmethod
+    def monthly_revenue_report(finance: FinanceModule) -> dict[str, float]:
+        """Monthly revenue from ALL revenue sources (parking fees + pass sales)."""
+        rev_by_month: dict[str, float] = {}
+        for d, amt, _src in finance.revenues:
+            month_key = d.strftime("%Y-%m")
+            rev_by_month[month_key] = rev_by_month.get(month_key, 0.0) + amt
+        return {m: round(v, 2) for m, v in rev_by_month.items()}
+
+    @staticmethod
+    def monthly_expense_report(finance: FinanceModule) -> dict[str, float]:
+        """Monthly expenses from entered expense records."""
+        exp_by_month: dict[str, float] = {}
+        for d, amt, _desc in finance.expenses:
+            month_key = d.strftime("%Y-%m")
+            exp_by_month[month_key] = exp_by_month.get(month_key, 0.0) + amt
+        return {m: round(v, 2) for m, v in exp_by_month.items()}
+
+    @staticmethod
+    def monthly_profit_report(finance: FinanceModule) -> dict[str, float]:
+        """Monthly profit = monthly revenue - monthly expenses."""
+        rev = ReportGenerator.monthly_revenue_report(finance)
+        exp = ReportGenerator.monthly_expense_report(finance)
+        all_months = set(rev.keys()) | set(exp.keys())
+
+        out: dict[str, float] = {}
+        for m in sorted(all_months):
+            out[m] = round(rev.get(m, 0.0) - exp.get(m, 0.0), 2)
+        return out
+
+    # ---- Printers ----
+    @staticmethod
+    def print_monthly_pass_sales_report(pass_sales: list[PassSale]) -> None:
+        data = ReportGenerator.monthly_pass_sales_report(pass_sales)
+        print("\n====== Monthly Pass Sales Report (PASSES SOLD) ======")
+        if not data or all(sum(v.values()) == 0 for v in data.values()):
+            print("No pass sales recorded yet.")
+            return
+        for month in sorted(data.keys()):
+            row = data[month]
+            print(f"{month} | Weekly: {row['WeeklyPass']} | Monthly: {row['MonthlyPass']} | Single: {row['SingleEntryPass']}")
+        print("====================================================\n")
+
+    @staticmethod
+    def print_monthly_car_report(receipts: list[Receipt]) -> None:
+        data = ReportGenerator.monthly_car_count(receipts)
+        print("\n====== Cars Per Month Report (Unique Plates) ======")
+        if not data:
+            print("No completed sessions yet.")
+            return
+        for month in sorted(data.keys()):
+            print(f"{month}: {data[month]} cars")
+        print("===================================================\n")
+
+    @staticmethod
+    def print_monthly_revenue_report(finance: FinanceModule) -> None:
+        data = ReportGenerator.monthly_revenue_report(finance)
+        print("\n====== Monthly Revenue Report (All Sources) ======")
+        if not data:
+            print("No revenue recorded yet.")
+            return
+        for month in sorted(data.keys()):
+            print(f"{month}: ${data[month]:.2f}")
+        print("==================================================\n")
+
+    @staticmethod
+    def print_monthly_profit_report(finance: FinanceModule) -> None:
+        profit = ReportGenerator.monthly_profit_report(finance)
+        rev = ReportGenerator.monthly_revenue_report(finance)
+        exp = ReportGenerator.monthly_expense_report(finance)
+
+        print("\n====== Monthly Profit Report (Revenue - Expenses) ======")
+        if not profit:
+            print("No profit data available yet.")
+            return
+        for month in profit.keys():
+            print(
+                f"{month} | Revenue: ${rev.get(month, 0.0):.2f} | "
+                f"Expenses: ${exp.get(month, 0.0):.2f} | Profit: ${profit[month]:.2f}"
+            )
+        print("=======================================================\n")
+
+=======
+
 # =========================================================
 # Parking Lot
 # =========================================================
