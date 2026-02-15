@@ -63,6 +63,88 @@ def safe_float_or_enter(prompt: str, default: float) -> float:
 
 
 # =========================================================
+# Abstract Base Classes (ABC)
+# =========================================================
+class Vehicle(ABC):
+    def __init__(self, plate: str):
+        self.plate = plate.strip().upper()
+
+    @property
+    @abstractmethod
+    def vehicle_type(self) -> str:
+        ...
+
+    @property
+    @abstractmethod
+    def multiplier(self) -> float:
+        ...
+
+
+class Pass(ABC):
+    def __init__(self, plate: str):
+        self.pass_id = str(uuid.uuid4())[:8].upper()
+        self.plate = plate.strip().upper()
+
+    @property
+    @abstractmethod
+    def pass_type(self) -> str:
+        ...
+
+    @abstractmethod
+    def is_valid(self, at_time: datetime) -> bool:
+        ...
+
+
+class PricingStrategy(ABC):
+    @abstractmethod
+    def calculate_price(
+        self,
+        duration_seconds: float,
+        vehicle: Vehicle,
+        entry_time: datetime,
+        exit_time: datetime,
+    ) -> float:
+        ...
+
+    @abstractmethod
+    def rule_name(self) -> str:
+        ...
+
+
+# =========================================================
+# Vehicle subclasses
+# =========================================================
+class Car(Vehicle):
+    @property
+    def vehicle_type(self) -> str:
+        return "Car"
+
+    @property
+    def multiplier(self) -> float:
+        return 1.0
+
+
+class Motorcycle(Vehicle):
+    @property
+    def vehicle_type(self) -> str:
+        return "Motorcycle"
+
+    @property
+    def multiplier(self) -> float:
+        return 0.8
+
+
+class Truck(Vehicle):
+    @property
+    def vehicle_type(self) -> str:
+        return "Truck"
+
+    @property
+    def multiplier(self) -> float:
+        return 1.5
+
+
+# =========================================================
 # Pass subclasses
 # =========================================================
 class MonthlyPass(Pass):
